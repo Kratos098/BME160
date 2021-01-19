@@ -3,7 +3,13 @@
 # Group Members: Natalie Bratset (nbratset)
 
 '''
-Program docstring goes here
+Read in a RNA or DNA codon, a one letter amino acid code, or a 3-letter amino acid code and convert between the types
+
+Example:
+input : ATG
+output: MET
+
+Do not assume that we will get a valid codon.
 '''
 short_AA = {
             'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
@@ -41,16 +47,16 @@ rnaCodonTable = {
 dnaCodonTable = {key.replace('U','T'):value for key, value in rnaCodonTable.items()}
 
 def main():
-    ''' Function docstring goes here'''
+    '''Get user code as string and print value from corresponding key in corresponding dictionary'''
     code = input("Please enter a code: ").upper() # get the input from the user and store an uppercased version in code
 
-    if code in short_AA:       # if the input is in the short_AA dictionary, unknown the corresponding entry
+    if code in short_AA:       # if the input is in the short_AA dictionary, print the corresponding entry
         print(code + " = " + (short_AA.get(code)).upper())
-    elif code in long_AA:       # if the input is in the long_AA dictionary, unknown the corresponding entry
+    elif code in long_AA:       # if the input is in the long_AA dictionary, print the corresponding entry
         print(code + " = " + (long_AA.get(code)).upper())
-    elif code in rnaCodonTable: # if the input is in the rnaCodonTable dictionary, unknown the corresponding entry
+    elif code in rnaCodonTable: # if the input is in the rnaCodonTable dictionary, print the corresponding entry
         print(code + " = " + (rnaCodonTable.get(code)).upper())
-    elif code in dnaCodonTable: # if the input is in the dnaCodonTable dictionary, unknown the corresponding entry
+    elif code in dnaCodonTable: # if the input is in the dnaCodonTable dictionary, print the corresponding entry
         print(code + " = " + (dnaCodonTable.get(code)).upper())
     else:                       # if the input is not in any fo the given dictionaries, print unknown
         print(code + " = unknown")
