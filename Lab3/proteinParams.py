@@ -18,7 +18,7 @@ class ProteinParam :
         'A': 89.093,  'G': 75.067,  'M': 149.211, 'S': 105.093, 'C': 121.158,
         'H': 155.155, 'N': 132.118, 'T': 119.119, 'D': 133.103, 'I': 131.173,
         'P': 115.131, 'V': 117.146, 'E': 147.129, 'K': 146.188, 'Q': 146.145,
-        'W': 204.225,  'F': 165.189, 'L': 131.173, 'R': 174.201, 'Y': 181.189
+        'W': 204.225, 'F': 165.189, 'L': 131.173, 'R': 174.201, 'Y': 181.189
         }
 
     mwH2O = 18.015
@@ -30,8 +30,9 @@ class ProteinParam :
     aaCterm = 2.34
 
     def __init__(self, protein):
-        self.protein = protein
-        self.composition = self.aaComposition()
+        '''Initialize class variables to be used by the class methods'''
+        self.protein = protein                  # class variable protein is the given protein sequence
+        self.composition = self.aaComposition() # class varaible composition is the dictionary returned by aaCompostion()
 
     def aaCount(self):
         '''Returns the total number of valid amino acid characters found in the protein string'''
@@ -44,7 +45,7 @@ class ProteinParam :
         return count                        # return count
 
     def pI(self):
-        pass
+        return 0.0
 
     def aaComposition(self):
         '''Returns a dictionary with (key, value) pairs of (animo acid character, count in protein string)'''
@@ -61,17 +62,30 @@ class ProteinParam :
         return charDict                     # return charDict
 
     def _charge_(self):
-        pass
+        return 0.0
 
     def molarExtinction(self):
-        pass
+        return 0.0
 
     def massExtinction(self):
         myMW =  self.molecularWeight()
         return self.molarExtinction() / myMW if myMW else 0.0
 
     def molecularWeight(self):
-        pass
+        '''Return the total molar weight of the entire protein string'''
+        # include the aa2mw table provided for calculations
+        aa2mw = {
+        'A': 89.093,  'G': 75.067,  'M': 149.211, 'S': 105.093, 'C': 121.158,
+        'H': 155.155, 'N': 132.118, 'T': 119.119, 'D': 133.103, 'I': 131.173,
+        'P': 115.131, 'V': 117.146, 'E': 147.129, 'K': 146.188, 'Q': 146.145,
+        'W': 204.225, 'F': 165.189, 'L': 131.173, 'R': 174.201, 'Y': 181.189
+        }
+        mwH2O = 18.015          # include the value of mwH2O provided for calulcations
+        molW = mwH2O            # intializa a variable molW to the value of mwH2O
+        comp = self.composition # intialize a dictionary comp to be the class variable composition
+        for char in comp:       # for every character in the dictionary, incremenet molW with the proper calulation
+            molW += comp.get(char) * (aa2mw.get(char) - mwH2O)
+        return molW             # return molW
 
 # Please do not modify any of the following.  This will produce a standard output that can be parsed
     
@@ -98,4 +112,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
+# VLSPADKTNVKAAW
