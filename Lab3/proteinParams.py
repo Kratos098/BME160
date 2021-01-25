@@ -30,7 +30,7 @@ class ProteinParam :
     aaCterm = 2.34
 
     def __init__(self, protein):
-        '''Initialize class variables to be used by the class methods'''
+        '''Initialize class variables to be used by the class methods.'''
         self.protein = protein                  # class variable protein is the given protein sequence
         self.composition = self.aaComposition() # class varaible composition is the dictionary returned by aaCompostion()
 
@@ -44,9 +44,6 @@ class ProteinParam :
                 count += 1
         return count                        # return count
 
-    def pI(self):
-        return 0.0
-
     def aaComposition(self):
         '''Returns a dictionary with (key, value) pairs of (animo acid character, count in protein string)'''
         # define a dictionary named charDict with the valid amino acid chars as keys and all values as 0
@@ -54,25 +51,24 @@ class ProteinParam :
             "A": 0, "C": 0, "D": 0, "E": 0, "F": 0, "G": 0, "H": 0, "I": 0, "L": 0, "K": 0,
             "M": 0, "N": 0, "P": 0, "Q": 0, "R": 0, "S": 0, "T": 0, "V": 0, "Y": 0, "W": 0
             }
-        
         for char in (self.protein).upper(): # iterate over every character of an uppercase version of the protein string
-            if char.upper() in charDict:    # if the current character exists in the dictionary, increment its value by 1
+            if char in charDict:            # if the current character exists in the dictionary, increment its value by 1
                 charDict[char] = charDict.get(char) + 1 
-        
         return charDict                     # return charDict
 
-    def _charge_(self):
-        return 0.0
-
     def molarExtinction(self):
-        return 0.0
+        '''Return the extinction coefficient of the native protein in water'''
+        exCo = {"Y": 1490, "W": 5500, "C": 125} # include the table provided and name it exCo
+        comp = self.composition                 # initialize variable named comp to be class varaible composition
+        # return the extinction coefficient using the formula given
+        return (comp.get("Y")*exCo.get("Y")) + (comp.get("W")*exCo.get("W")) + (comp.get("C")*exCo.get("C"))
 
     def massExtinction(self):
         myMW =  self.molecularWeight()
         return self.molarExtinction() / myMW if myMW else 0.0
 
     def molecularWeight(self):
-        '''Return the total molar weight of the entire protein string'''
+        '''Return the total molar weight of the entire protein sequence'''
         # include the aa2mw table provided for calculations
         aa2mw = {
         'A': 89.093,  'G': 75.067,  'M': 149.211, 'S': 105.093, 'C': 121.158,
@@ -86,9 +82,51 @@ class ProteinParam :
         for char in comp:       # for every character in the dictionary, incremenet molW with the proper calulation
             molW += comp.get(char) * (aa2mw.get(char) - mwH2O)
         return molW             # return molW
+    
+    def _charge_(self, pH):
+        '''Returns the net charge of the given protein at the specified pH'''
+        # include tables and values included for calculations
+        aa2chargePos = {'K': 10.5, 'R':12.4, 'H':6}
+        aa2chargeNeg = {'D': 3.86, 'E': 4.25, 'C': 8.33, 'Y': 10}
+        aaNterm = 9.69
+        aaCterm = 2.34
+
+        protein = self.protein  # initialize variable named protein to be class varaible protein
+        comp = self.composition # initialize variable named comp to be class varaible composition
+
+        chargePos = (10**aaNterm)/((10**aaNterm)+(10**pH)) # initialize chargePos to be the relevant part of the equation with Nterm
+        chargeNeg = (10**pH)/((10**aaCterm)+(10**pH))      # initialize chargeNeg to be the relevant part of the equation with Cterm
+        for char in protein.upper():   # for every character in the uppercase version of protein
+            if char in aa2chargePos:   # if char is in aa2chargePos, apply the relevant part of the equation and increment chargePos
+                numer = (10 ** aa2chargePos.get(char))
+                denom = (10 ** aa2chargePos.get(char)) + (10 ** pH)
+                chargePos += numer/denom
+            
+            elif char in aa2chargeNeg: # if char is in aa2chargeNeg, apply the relevant part of the equation and increment chargeNeg
+                numer = (10 ** pH)
+                denom = (10 ** aa2chargeNeg.get(char)) + (10 ** pH)
+                chargeNeg += numer/denom
+        
+        return chargePos - chargeNeg # return the difference between chargePos and chargeNeg
+    
+    def pI(self):
+        '''Returns the pH of the The theoretical isolelectric point of the protein'''
+        # intialize pH, maxpH, charge, and maxCharge to reasonable values
+        pH        = 0.0
+        maxpH     = 42.0
+        charge    = 0.0
+        maxCharge = 999
+        while pH <= 14: # while pH is less than or equal to 14
+            charge = self._charge_(pH) # call the _charge_ method and assign its value to charge
+            if abs(maxCharge) >= abs(charge): # if the abs val of maxCharge is greater than or equal to the abs val of charge, 
+                                              # maxpH is pH and maxCharge is charge
+                maxpH = pH
+                maxCharge = charge
+            pH += 0.01 # increment pH by 0.01
+        return maxpH #return maxpH
 
 # Please do not modify any of the following.  This will produce a standard output that can be parsed
-    
+
 import sys
 def main():
     inString = input('protein sequence?')
